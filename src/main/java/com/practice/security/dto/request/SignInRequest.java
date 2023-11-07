@@ -1,4 +1,4 @@
-package com.practice.security.dao.request;
+package com.practice.security.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

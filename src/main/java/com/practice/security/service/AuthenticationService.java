@@ -5,9 +5,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.practice.security.dao.request.SignInRequest;
-import com.practice.security.dao.request.SignUpRequest;
-import com.practice.security.dao.response.JwtAuthenticationResponse;
+import com.practice.security.dto.request.SignInRequest;
+import com.practice.security.dto.request.SignUpRequest;
 import com.practice.security.entity.Role;
 import com.practice.security.entity.User;
 import com.practice.security.repository.UserRepository;
@@ -22,24 +21,25 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public JwtAuthenticationResponse signup(SignUpRequest request) {
-        var user = User.builder()
+    public String signup(SignUpRequest request) throws Exception {
+        if(userRepository.findByUsername(request.getUsername()).isPresent()){
+            throw new Exception("Username already exists");
+        }
+        User user = User.builder()
                 .name(request.getName())
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
                 .build();
         userRepository.save(user);
-        var jwt = jwtService.generateToken(user);
-        return JwtAuthenticationResponse.builder().token(jwt).build();
+        return jwtService.generateToken(user);
     }
 
-    public JwtAuthenticationResponse signin(SignInRequest request) {
+    public String signin(SignInRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
         var user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
-        var jwt = jwtService.generateToken(user);
-        return JwtAuthenticationResponse.builder().token(jwt).build();
+        return jwtService.generateToken(user);
     }
 }

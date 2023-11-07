@@ -2,6 +2,8 @@ package com.practice.security.controller;
 
 import java.util.List;
 
+import com.practice.security.dto.response.ApiResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,7 +20,11 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/users")
-    public ResponseEntity<List<User>> getUsers() {
-        return ResponseEntity.ok().body(userService.getUsers());
+    public ResponseEntity<ApiResponse> getUsers() {
+        try{
+            return ResponseEntity.ok(ApiResponse.success("Successfully Generated Users", userService.getUsers()));
+        } catch (Exception e){
+            return ResponseEntity.ok(ApiResponse.error("An error occurred", e.getMessage()));
+        }
     }
 }
